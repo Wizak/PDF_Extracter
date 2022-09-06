@@ -9,22 +9,21 @@ def init_tesseract(tes_path=r'C:\Program Files\Tesseract-OCR\tesseract'):
     pytesseract.pytesseract.tesseract_cmd = tes_path
 
 
-class PDFExtracter(_Singleton, _PDFManager):
-    def extract_non_searchable(self):
-        image_bytes = self._extract_image()
-        img_to_text = pytesseract.image_to_string(image_bytes)
-        # print(img_to_text)
-        text_data = self._text_to_dict(img_to_text)
-        return text_data
+class PDFExtracter(_PDFManager):
+    def _extract_non_searchable(self):
+        text_data = ''
+        for stream in self._extract_image():
+            text_data += pytesseract.image_to_string(stream)
+            text_formated = self._text_format(text_data)
+        return text_formated
 
-    def extract_searchable(self):
-        text_to_text = self.general_page.extractText()
-        text_data = self._text_to_dict(text_to_text)
+    def _extract_searchable(self):
+        text_data = self._text_format(self.text_or_none)
         return text_data
 
     def extract(self, file_path):
-        check = self._check_is_scan(file_path)
-        if check:
-            return self.extract_non_searchable()
+        self.text_or_none = self._check_is_scan(file_path)
+        if self.text_or_none:
+            return self._extract_searchable()
         else:
-            return self.extract_searchable()
+            return self._extract_non_searchable()

@@ -1,7 +1,9 @@
 from os import listdir
-
 from os.path import isfile
 from os.path import join
+
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 
 from ._kernel import _Singleton
 
@@ -16,19 +18,13 @@ def pdf_from_dir(dir_path):
 
 
 class Checker(_Singleton):
-    def __filtering(self, key):
-        cond_left = self.__data[key].lower().startswith(self.__query)
-        cond_right = self.__query == self.__data[key]
+    def __filtering(self, query, data):
+        contains_check = query in data
+        extract_same = process.extractOne(query, data.split())
+        extract_check = (extract_same[-1] >= 90)
 
-        if cond_left or cond_right:
+        if contains_check or extract_check:
             return True
-        return False
 
     def check(self, query, data):
-        self.__query = query.lower()
-        self.__data = data
-        fkeys = filter(self.__filtering, self.__data)
-        self.fdata = {key: data[key] for key in fkeys}
-        if len(self.fdata) >= 1:
-            return True
-        return False
+        return self.__filtering(query.lower(), data.lower())

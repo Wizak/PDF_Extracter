@@ -1,6 +1,7 @@
 from PIL import Image
 
-import PyPDF2
+import fitz
+import io
 
 
 class _Singleton(object):
@@ -12,38 +13,27 @@ class _Singleton(object):
         return class_._instance
 
 
-class _PDFManager:
+class _PDFManager(_Singleton):
     def _check_is_scan(self, file_path):
-        pdf_reader = PyPDF2.PdfReader(file_path)
-        self.general_page = pdf_reader.pages[0]
-        return self.general_page.extractText() == ''
+        self.doc = fitz.open(file_path)
+        text = ""
+        for page in self.doc:
+            text += page.get_text()
+        return text or None
 
-    def _text_to_dict(self, text):
+    def _text_format(self, text):
         text_splines = text.splitlines()
-        text_stspaces = map(lambda el: el.strip(), text_splines)
-        text_sspaces = tuple(filter(lambda el: el != '', text_stspaces))[1:]
-
-        text_mid = int(len(text_sspaces)/2)
-        data = {
-            kw: v for kw, v in zip(text_sspaces[:text_mid], text_sspaces[text_mid:])
-        }
-        return data
+        # text_stspaces = map(lambda el: el.strip(), text_splines)
+        # text_seq = tuple(filter(lambda el: el != '', text_stspaces))
+        text_output = ' '.join(text_splines)
+        return text_output
 
     def _extract_image(self):
-        x_object = self.general_page["/Resources"]["/XObject"].getObject()
-
-        for obj in x_object:
-            if x_object[obj]["/Subtype"] == "/Image":
-                size = (x_object[obj]["/Width"], x_object[obj]["/Height"])
-                data = x_object[obj].getData()
-
-                if x_object[obj]["/ColorSpace"] == "/DeviceRGB":
-                    mode = "RGB"
-                else:
-                    mode = "P"
-
-                if x_object[obj]["/Filter"] == "/FlateDecode":
-                    img = Image.frombytes(mode, size, data)
-                    return img
-                if x_object[obj]["/Filter"] == "/DCTDecode" or x_object[obj]["/Filter"] == "/JPXDecode":
-                    return data
+        nps = self.doc.page_count
+        for np in range(nps):
+            page = self.doc.load_page(np)
+            pix = page.get_pixmap()
+            pix_bytes = pix.pil_tobytes(format="JPEG")
+            stream = io.BytesIO(pix_bytes)
+            img = Image.open(stream)
+            yield img

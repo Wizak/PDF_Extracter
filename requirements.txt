@@ -3,3 +3,4 @@ Pillow==9.2.0
 pyparsing==3.0.9
 PyPDF2==2.10.5
 pytesseract==0.3.10
+PyMuPDF
