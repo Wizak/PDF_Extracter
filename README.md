@@ -17,13 +17,13 @@ python main.py
 ## For Linux system
 #### Install ocr
 ```
-sh iother.sh
+bash ./scripts/iother.sh
 ```
 #### Install python packages
 ```
-sh idep.sh
+bash ./scripts/idep.sh
 ```
 #### Run python script
 ```
-sh run.sh
+bash ./scripts/run.sh
 ```
