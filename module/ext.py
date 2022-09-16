@@ -13,8 +13,7 @@ class PDFExtracter(_Singleton, _PDFManager):
     def extract_non_searchable(self):
         image_bytes = self._extract_image()
         img_to_text = pytesseract.image_to_string(image_bytes)
-        # print(img_to_text)
-        text_data = self._text_to_dict(img_to_text)
+        text_data = self._prettify_text(img_to_text)
         return text_data
 
     def extract_searchable(self):
