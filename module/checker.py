@@ -26,9 +26,6 @@ class Checker(_Singleton):
 
     def check(self, query, data):
         self.__query = query.lower()
-        self.__data = data
-        fkeys = filter(self.__filtering, self.__data)
-        self.fdata = {key: data[key] for key in fkeys}
-        if len(self.fdata) >= 1:
-            return True
-        return False
+        self.__data = data.lower()
+        condition = self.__query in self.__data
+        return condition
