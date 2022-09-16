@@ -18,16 +18,12 @@ class _PDFManager:
         self.general_page = pdf_reader.pages[0]
         return self.general_page.extractText() == ''
 
-    def _text_to_dict(self, text):
+    def _prettify_text(self, text):
         text_splines = text.splitlines()
         text_stspaces = map(lambda el: el.strip(), text_splines)
         text_sspaces = tuple(filter(lambda el: el != '', text_stspaces))[1:]
-
-        text_mid = int(len(text_sspaces)/2)
-        data = {
-            kw: v for kw, v in zip(text_sspaces[:text_mid], text_sspaces[text_mid:])
-        }
-        return data
+        joined = ' '.join(text_sspaces)
+        return joined
 
     def _extract_image(self):
         x_object = self.general_page["/Resources"]["/XObject"].getObject()
