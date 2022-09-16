@@ -19,7 +19,7 @@ class PDFExtracter(_Singleton, _PDFManager):
 
     def extract_searchable(self):
         text_to_text = self.general_page.extractText()
-        text_data = self._text_to_dict(text_to_text)
+        text_data = self._prettify_text(text_to_text)
         return text_data
 
     def extract(self, file_path):
